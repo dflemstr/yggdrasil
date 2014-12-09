@@ -1,0 +1,8 @@
+<ul>
+    <li pouch-repeat="item in rawDb">
+        <h2 contenteditable="true" ng-model="item.title" ng-blur="db.save(item)"></h2>
+        <div contenteditable="true" ng-model="item.body" ng-blur="db.save(item)"></div>
+        (id: {{item._id}}, revision: {{item._rev}})
+    </li>
+</ul>
+<button type="button" ng-click="db.add('thing');">Add a thing</button>
