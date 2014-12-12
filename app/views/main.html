@@ -1,8 +1,33 @@
-<ul>
-    <li pouch-repeat="item in rawDb">
-        <h2 contenteditable="true" ng-model="item.title" ng-blur="db.save(item)"></h2>
-        <div contenteditable="true" ng-model="item.body" ng-blur="db.save(item)"></div>
-        (id: {{item._id}}, revision: {{item._rev}})
-    </li>
-</ul>
-<button type="button" ng-click="db.add('thing');">Add a thing</button>
+<main>
+    <article ng-repeat="item in db.roots">
+        <h2 ng-model="item.title"
+            medium-editor
+            options="{
+              placeholder: 'Thing',
+              disableToolbar: true,
+              disableReturn: true,
+              cleanPastedHTML: true
+            }"
+            ng-blur="db.save(item)"></h2>
+        <section ng-model="item.body"
+                 medium-editor
+                 options="{
+                   cleanPastedHTML: true,
+                   disableDoubleReturn: true,
+                   placeholder: ''
+                 }"
+                 ng-blur="db.save(item)"></section>
+        <p><small class="text-muted">(id: {{item._id}}, revision: {{item._rev}})</small></p>
+        <div class="btn-group" role="group" aria-label="Node actions">
+            <button type="button" class="btn btn-default" ng-click="db.add({parent: item._id})">Add child</button>
+            <button type="button" class="btn btn-default" ng-click="db.delete(item)">Delete</button>
+        </div>
+        <ul>
+            <li ng-repeat="child in db.children(item)">
+                {{child.title}}
+            </li>
+        </ul>
+    </article>
+</main>
+<hr/>
+<button type="button" class="btn btn-default" ng-click="db.add({});">Add a thing</button>

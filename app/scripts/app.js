@@ -14,7 +14,9 @@ angular
     'ngRoute',
     'ngTouch',
     'pouchdb',
-    'base64'
+    'base64',
+    'angular-medium-editor',
+    'uuid'
   ])
   .config(function ($routeProvider) {
     $routeProvider
