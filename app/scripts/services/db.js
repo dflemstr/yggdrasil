@@ -8,7 +8,7 @@
  * Service in the yggdrasilApp.
  */
 angular.module('yggdrasilApp')
-  .factory('db', function (pouchdb, $http, $base64, rfc4122, $q) {
+  .factory('db', function (pouchdb, $http, base64) {
     var dbname = 'yggdrasil';
     var user = 'admin';
     var password = 'abc123';
@@ -22,15 +22,37 @@ angular.module('yggdrasilApp')
     // Make the `db` synchronize with `remoteDb`
     var replicate = function () {
       var opts = {live: true};
-      db.replicate.to(remoteDb, opts);
-      db.replicate.from(remoteDb, opts);
+      var onChange = function (info) {
+        console.log('change', info);
+      };
+      var onComplete = function (info) {
+        console.log('complete', info);
+      };
+      var onUpToDate = function (info) {
+        console.log('upToDate', info);
+      };
+      var onError = function (err) {
+        console.log('error', err);
+      };
+
+      db.replicate.to(remoteDb, opts)
+        .on('change', onChange)
+        .on('complete', onComplete)
+        .on('uptodate', onUpToDate)
+        .on('error', onError);
+
+      db.replicate.from(remoteDb, opts)
+        .on('change', onChange)
+        .on('complete', onComplete)
+        .on('uptodate', onUpToDate)
+        .on('error', onError);;
     };
 
     // Create the `remoteDb`; returns promise
     var createDb = function () {
       return $http.put(remoteDb, {}, {
         headers: {
-          'Authorization': 'Basic ' + $base64.encode(user + ':' + password)
+          'Authorization': 'Basic ' + base64.encode(user + ':' + password)
         }
       });
     };
@@ -46,53 +68,41 @@ angular.module('yggdrasilApp')
 
     // Creates a new random node ID
     var makeNodeId = function() {
-      return 'node/' + rfc4122.v4();
-    };
+      var digits = 'ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789-_';
 
-    // Given that a certain `doc` has changed, include or exclude it from an
-    // `array`
-    var sync = function (array, doc) {
-      for (var i = 0; i < array.length; i++) {
-        // Other version of doc is already in array
-        if (array[i]._id === doc._id) {
-          if (doc._deleted) {
-            // doc is deleted, so it should be removed from the array
-            array.splice(i, 1);
-          } else {
-            // doc was simply updated
-            array[i] = doc;
-          }
-          return;
-        }
+      var id = '';
+      for (var i = 0; i < 20; ++i) {
+        id += digits[Math.floor(Math.random() * digits.length)];
       }
-      if (!doc._deleted) {
-        // doc was created and should be added
-        array.push(doc);
-      }
+
+      return 'node/' + id;
     };
 
     var syncedFilters = {};
     var syncedFilter = function (id, filter) {
       if (!syncedFilters[id]) {
-        var into = [];
+        var collection = {};
+
         db.query(function (doc, emit) {
           if (filter(doc)) {
-            emit();
+            emit(doc.weight);
           }
         }, {
           include_docs: true
         }).then(function (data) {
-          var docs = data.rows.map(function (r) {return r.doc;});
-          Array.prototype.splice.apply(into, [0, docs.length].concat(docs));
+          data.rows.forEach(function(row) {
+            var doc = row.doc;
+            collection[doc._id] = doc;
+          });
         });
 
         syncedFilters[id] = {
           filter: filter,
-          into: into
+          collection: collection
         };
       }
 
-      return syncedFilters[id].into;
+      return syncedFilters[id].collection;
     };
 
     db.changes({
@@ -101,11 +111,13 @@ angular.module('yggdrasilApp')
       include_docs: true,
       onChange: function(data) {
         var doc = data.doc;
-        console.log(data);
+        console.log('database entry changed: ', data);
         Object.keys(syncedFilters).forEach(function(id) {
           var f = syncedFilters[id];
-          if (f.filter(doc) || doc._deleted) {
-            sync(f.into, doc);
+          if (f.filter(doc) && !doc._deleted) {
+            f.collection[doc._id] = doc;
+          } else {
+            delete f.collection[doc._id];
           }
         });
       }
@@ -115,18 +127,34 @@ angular.module('yggdrasilApp')
 
     return {
       raw: db,
-      add: function (node) {
+      add: function (node, after, before) {
+        var weight;
+        if (after && before) {
+          weight = (after.weight + before.weight) / 2;
+        } else if (after && !before) {
+          weight = (after.weight + 1) / 2;
+        } else if (!after && before) {
+          weight = before.weight / 2;
+        } else {
+          weight = 0.5;
+        }
+        node.weight = weight;
         node._id = makeNodeId();
-        db.put(node);
+        return db.put(node);
       },
-      delete: function (node) {
-        db.remove(node);
+      remove: function (node) {
+        return db.remove(node);
       },
       save: function (newNode) {
-        db.get(newNode._id).then(function (currentNode) {
+        return db.get(newNode._id).then(function (currentNode) {
           if (!angular.equals(currentNode, newNode)) {
             db.put(newNode);
           }
+        });
+      },
+      byId: function (id) {
+        return syncedFilter('id-' + id, function (doc) {
+          return doc._id === id;
         });
       },
       roots: syncedFilter('roots', function(doc) {

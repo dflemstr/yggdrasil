@@ -14,9 +14,9 @@ angular
     'ngRoute',
     'ngTouch',
     'pouchdb',
-    'base64',
+    'ab-base64',
     'angular-medium-editor',
-    'uuid'
+    'RecursionHelper'
   ])
   .config(function ($routeProvider) {
     $routeProvider
@@ -27,6 +27,10 @@ angular
       .when('/about', {
         templateUrl: 'views/about.html',
         controller: 'AboutCtrl'
+      })
+      .when('/node/:id', {
+        templateUrl: 'views/node.html',
+        controller: 'NodeCtrl'
       })
       .otherwise({
         redirectTo: '/'

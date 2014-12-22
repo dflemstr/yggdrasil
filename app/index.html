@@ -2,7 +2,7 @@
 <html class="no-js">
   <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>Yggdrasil &mdash; information tree</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -10,6 +10,7 @@
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/medium-editor/dist/css/medium-editor.css" />
     <link rel="stylesheet" href="bower_components/medium-editor/dist/css/themes/default.css" />
+    <link rel="stylesheet" href="bower_components/angular-ui-tree/dist/angular-ui-tree.min.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
@@ -21,22 +22,21 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
-    <!-- Add your site or application content here -->
     <div class="container">
-      <div class="header">
+      <header>
         <ul class="nav nav-pills pull-right">
-          <li class="active"><a ng-href="#">Home</a></li>
+          <li class="active"><a ng-href="#/">Home</a></li>
           <li><a ng-href="#/about">About</a></li>
-          <li><a ng-href="#">Contact</a></li>
         </ul>
-        <h3 class="text-muted">yggdrasil</h3>
-      </div>
+        <h1 class="text-muted">yggdrasil</h1>
+      </header>
 
-      <div ng-view=""></div>
+      <article ng-view=""></article>
 
-      <div class="footer">
-        <p><span class="glyphicon glyphicon-heart"></span> from the Yeoman team</p>
-      </div>
+      <hr />
+      <footer>
+        <p>© 2014 David Flemström</p>
+      </footer>
     </div>
 
 
@@ -80,19 +80,24 @@
     <script src="bower_components/pouchdb/dist/pouchdb.js"></script>
     <script src="bower_components/angular-pouchdb/angular-pouchdb.js"></script>
     <script src="bower_components/angular-base64/angular-base64.js"></script>
+    <script src="bower_components/angular-base64/angular-base64.min.js"></script>
     <script src="bower_components/medium-editor/dist/js/medium-editor.js"></script>
     <script src="bower_components/angular-medium-editor/dist/angular-medium-editor.js"></script>
     <script src="bower_components/angular-uuid-service/uuid-svc.js"></script>
+    <script src="bower_components/angular-utf8-base64/angular-utf8-base64.js"></script>
+    <script src="bower_components/angular-recursion/angular-recursion.js"></script>
+    <script src="bower_components/angular-ui-tree/dist/angular-ui-tree.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
-        <!-- build:js({.tmp,app}) scripts/scripts.js -->
-        <script src="scripts/app.js"></script>
-        <script src="scripts/controllers/main.js"></script>
-        <script src="scripts/controllers/about.js"></script>
-        <script src="scripts/services/db.js"></script>
-        <script src="scripts/directives/node.js"></script>
-        <script src="scripts/directives/dbrepeat.js"></script>
-        <!-- endbuild -->
-</body>
+    <!-- build:js({.tmp,app}) scripts/scripts.js -->
+    <script src="scripts/app.js"></script>
+    <script src="scripts/controllers/main.js"></script>
+    <script src="scripts/controllers/about.js"></script>
+    <script src="scripts/services/db.js"></script>
+    <script src="scripts/directives/node-editor.js"></script>
+    <script src="scripts/controllers/node.js"></script>
+    <script src="scripts/filters/toarray.js"></script>
+    <!-- endbuild -->
+  </body>
 </html>
