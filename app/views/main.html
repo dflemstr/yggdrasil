@@ -1,6 +1,6 @@
 <main>
     <div ng-repeat="root in roots">
-        <h1 ng-if="root.title">
+        <h1>
             <a href="#/{{root._id}}">
                 <em ng-if="!root.title" class="text-muted">(Untitled)</em>
                 <span ng-if="root.title">{{root.title}}</span>

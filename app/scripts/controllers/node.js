@@ -9,5 +9,16 @@
  */
 angular.module('yggdrasilApp')
   .controller('NodeCtrl', function ($scope, $routeParams, db) {
-    $scope.nodes = db.byId('node/' + $routeParams.id);
+    var id = 'node/' + $routeParams.id;
+
+    $scope.node = null;
+    db.byId(id).then(function (node) {
+      $scope.node = node;
+    });
+
+    $scope.$on('node-change', function (e, node) {
+      if (node._id === id) {
+        $scope.node = node;
+      }
+    });
   });

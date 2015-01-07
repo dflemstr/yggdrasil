@@ -9,7 +9,17 @@
  */
 angular.module('yggdrasilApp')
   .controller('MainCtrl', function ($scope, $location, db) {
-    $scope.roots = db.roots;
+    $scope.roots = {};
+
+    db.roots().then(function (roots) {
+      Object.keys(roots).forEach(function (id) {
+        db.updateCollection($scope.roots, roots[id], true);
+      });
+    });
+
+    $scope.$on('node-change', function (e, node) {
+      db.updateCollection($scope.roots, node, !node.parent);
+    });
 
     $scope.add = function () {
       db.add({}).then(function (data) {

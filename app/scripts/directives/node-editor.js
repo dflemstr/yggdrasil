@@ -19,17 +19,28 @@ angular.module('yggdrasilApp')
         return RecursionHelper.compile(element);
       },
       controller: function ($scope) {
-        $scope.children = db.children($scope.node);
+        $scope.children = {};
+
+        // TODO: $scope.$watch
+        db.children($scope.node).then(function (children) {
+          Object.keys(children).forEach(function (id) {
+            db.updateCollection($scope.children, children[id], true);
+          });
+        });
+
+        $scope.$on('node-change', function (e, node) {
+          db.updateCollection($scope.children, node, node.parent && node.parent === $scope.node._id);
+        });
+
         $scope.save = function () {
           db.save($scope.node);
         };
+
         $scope.addChild = function () {
           var after = undefined;
           var maxWeight = 0;
-          var keys = Object.keys($scope.children);
-
-          keys.forEach(function (key) {
-            var child = $scope.children[key];
+          Object.keys($scope.children).forEach(function (id) {
+            var child = $scope.children[id];
             if (child.weight > maxWeight) {
               after = child;
               maxWeight = child.weight;

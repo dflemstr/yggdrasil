@@ -7,8 +7,7 @@
         disableReturn: true,
         cleanPastedHTML: true
         }"
-        ng-focus="focused = true;"
-        ng-blur="save(); focused = false;"></h1>
+        ng-blur="save();"></h1>
     <p ng-model="node.body"
        medium-editor
        options="{
@@ -16,8 +15,7 @@
        disableDoubleReturn: true,
        placeholder: 'Content'
        }"
-       ng-focus="focused = true;"
-       ng-blur="save(); focused = false;"></p>
+       ng-blur="save();"></p>
     <p><small class="text-muted">(Id: {{node._id}}, Revision: {{node._rev}}, Weight: {{node.weight}})</small></p>
     <button type="button" ng-click="addChild()">Add child</button>
     <node-editor ng-repeat="child in children|toArray|orderBy:'weight'" node="child" depth="depth() + 1"/>
